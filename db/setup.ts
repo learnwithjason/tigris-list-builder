@@ -1,13 +1,10 @@
 import { Tigris } from '@tigrisdata/core';
-import { Movie } from './models/movies';
+import { Artist } from './models/artists';
 
 async function main() {
-	// setup client
 	const tigrisClient = new Tigris();
-	// ensure branch exists, create it if it needs to be created dynamically
 	await tigrisClient.getDatabase().initializeBranch();
-	// register schemas
-	await tigrisClient.registerSchemas([Movie]);
+	await tigrisClient.registerSchemas([Artist]);
 }
 
 main()

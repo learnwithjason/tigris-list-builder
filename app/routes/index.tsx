@@ -1,42 +1,35 @@
 import { useLoaderData } from '@remix-run/react';
-import { Order, Tigris } from '@tigrisdata/core';
-import type { Movie } from 'db/models/movies';
+import { Tigris } from '@tigrisdata/core';
+import type { SearchQuery } from '@tigrisdata/core/dist/search';
+import type { Artist } from 'db/models/artists';
 
 export async function loader() {
-	const db = new Tigris().getDatabase();
-	const movies = db.getCollection<Movie>('movies');
+	const client = new Tigris();
+	const db = client.getDatabase();
+	const artists = db.getCollection<Artist>('artists');
 
-	const result = await movies.search(
-		{
-			q: 'day',
-			searchFields: ['title', 'cast', 'genres'],
-			facets: ['year'],
-			sort: [
-				{
-					field: 'year',
-					order: Order.DESC,
-				},
-			],
-			hitsPerPage: 50,
-		},
-		1,
-	);
+	const query: SearchQuery<Artist> = {
+		q: 'hip hop',
+		searchFields: ['name', 'genres'],
+		facets: ['genres'],
+	};
 
-	return result.hits;
+	const results = await artists.search(query);
+
+	for await (const result of results) {
+		console.log(JSON.stringify(result, null, 2));
+	}
+
+	return results;
 }
 
 export default function Index() {
-	const movies: Movie[] = useLoaderData();
+	const data = useLoaderData();
 
 	return (
 		<>
-			<h1>Movie Night Playlist Builder</h1>
-			<pre>{JSON.stringify(movies, null, 2)}</pre>
-			{/* {movies.map((movie) => (
-				<li key={movie.id}>
-					<strong>{movie.title}</strong> ({movie.year})
-				</li>
-			))} */}
+			<h1>Musical Artists</h1>
+			<pre>{JSON.stringify(data, null, 2)}</pre>
 		</>
 	);
 }
